@@ -1,15 +1,12 @@
 import requests
 import pandas as pd
 import logging
-import google
 import json
 import os
 
 def getApiMetadataFile():
     ApiDataFileMetadataFile="config/cricbuzz_api_config.csv"
-
     ApiDataFileMetadataDF=pd.read_csv(ApiDataFileMetadataFile)
-    # print(ApiDataFileMetadataDF)
     return ApiDataFileMetadataDF
 
 
@@ -39,7 +36,10 @@ def saveApiResponseJSON(file_name,data):
 
 
 def getApiData(api_name):
-    apimetadata=getApiMetadataFile()
+
+    ApiDataFileMetadataFile = "config/cricbuzz_api_config.csv"
+    apimetadata = pd.read_csv(ApiDataFileMetadataFile)
+
     api_metadata_dataset=apimetadata[apimetadata["api_name"]==api_name]
 
     api_url=api_metadata_dataset["url"].iloc[0]
@@ -47,10 +47,11 @@ def getApiData(api_name):
     api_host=api_metadata_dataset["x-rapidapi-host"].iloc[0]
 
     json_file_name = f"dataset/{api_name}.json"
+
     if not (os.path.exists(json_file_name)):
         json_dataset=hitAPI(api_url,api_key,api_host)
         saveApiResponseJSON(json_file_name,json_dataset)
     else:
-        print(f"{json_file_name} already present!!")
+        logging.info(f"{json_file_name} already present!!")
 
 
