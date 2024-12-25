@@ -1,4 +1,6 @@
 import json
+import logging
+
 from google.cloud import storage
 from google.oauth2 import service_account
 
@@ -13,13 +15,14 @@ def uploadToGCS(bucket,destination_file,source_file):
     storage_client=storage.Client(credentials=credentials)
     bucket=storage_client.bucket(bucket)
     blob=bucket.blob(destination_file)
+
     if not blob.exists():
         generation_match_precondition = 0
         blob.upload_from_filename(source_file, if_generation_match=generation_match_precondition)
-        print( f"File {source_file} uploaded to GCS as {destination_file}.")
+        logging.info( f"File {source_file} uploaded to GCS as {destination_file}.")
 
     else:
-        print(f"{destination_file} already present inside GCS")
+        logging.info(f"{destination_file} already present inside GCS!!!")
 
 
-uploadToGCS("cricbuzz", "matches_list.json","dataset/matches_list.json")
+#uploadToGCS("cricbuzz", "matches_list.json","dataset/matches_list.json")
