@@ -19,6 +19,7 @@ def hitAPI(url,key,host):
     try:
         api_dataset = requests.get(url, headers=api_headers)
         if 200 <= api_dataset.status_code < 300:
+            logging.info("API HIT successful and returned data")
             return api_dataset.json()
 
 
@@ -54,4 +55,13 @@ def getApiData(api_name):
     else:
         logging.info(f"{json_file_name} already present!!")
 
+def getAllApiData():
+    ApiDataFileMetadataFile = "config/cricbuzz_api_config.csv"
+    read_all_metadata=pd.read_csv(ApiDataFileMetadataFile)
+    read_all_metadata=read_all_metadata[read_all_metadata["api_name"].notna()]
+    api_name_list=read_all_metadata["api_name"].tolist()
+    for i in api_name_list:
+        logging.info(f"calling API {i}")
+        getApiData(i)
 
+#getAllApiData()
