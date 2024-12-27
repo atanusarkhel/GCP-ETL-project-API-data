@@ -43,4 +43,4 @@ def uploadAllFileToGCS():
 
 
 #uploadToGCS("cricbuzz", "matches_list.json","dataset/matches_list.json")
-#uploadAllFileToGCS()
+uploadAllFileToGCS()
