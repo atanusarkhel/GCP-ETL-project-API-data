@@ -1,7 +1,8 @@
 import apache_beam as beam
+from apache_beam.transforms.combiners import Top
 from apache_beam.options.pipeline_options import PipelineOptions
 import json
-from apache_beam.io import WriteToParquet, ReadFromJson
+from apache_beam.io import ReadFromText
 import pyarrow as pa
 import pyarrow.parquet as pq
 import argparse
@@ -50,20 +51,21 @@ def writeToParquet(json_data,schema,output_file):
 
 options= PipelineOptions(
     flags=None,
-    runner='DataflowRunner',
+    runner='DirectRunner',
     project="famous-crossing-445714-p4",
     region="us-east1",
     temp_location="gs://cricbuzz/temp/",
     staging_location="gs://cricbuzz/staging_loc/",
     output_location="gs://cricbuzz/transform_parquet/",
-    job_name="json_to_parquet"
+    job_name='json-to-parquet',
+    save_main_session=True
 )
 
 def run(input_folder,output_folder):
     with beam.Pipeline(options=options) as p:
         input_files=(
             p
-            | 'read Files' >> beam.io.ReadFromText(input_folder)
+            | 'read Files' >> ReadFromText(input_folder)
             | 'parse json' >> beam.Map(jsonToDict)
             | 'Infer Schema' >> beam.Map(lambda x: inferSchemaFromJson(x) if x else None)
         )
@@ -71,7 +73,7 @@ def run(input_folder,output_folder):
         schema=(
             input_files
             | 'extract schema' >> beam.Filter(lambda x : x if x else None)
-            | 'First Schema'  >> beam.Top.Of(1, key=lambda x: 1)
+            | 'First Schema'  >> Top.Of(1, key=lambda x: 1)
             | 'Get Schema'   >> beam.Map(lambda x: x[0])
         )
         input_files | 'Convert to Arrow table' >> beam.Map(lambda x: convertToArrowTable(x,schema) if x else None) \
